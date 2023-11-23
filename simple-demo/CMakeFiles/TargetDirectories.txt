@@ -1,0 +1,3 @@
+/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/hscpp/examples/simple-demo/CMakeFiles/simple-demo.dir
+/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/hscpp/examples/simple-demo/CMakeFiles/edit_cache.dir
+/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/hscpp/examples/simple-demo/CMakeFiles/rebuild_cache.dir

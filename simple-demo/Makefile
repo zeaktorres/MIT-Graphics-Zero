@@ -1,6 +1,5 @@
 INCFLAGS  = -I /usr/include/GL
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero 
-INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 
 LINKFLAGS  = -lglut -lGL -lGLU
 LINKFLAGS += -L /mit/6.837/public/lib -lvecmath
@@ -8,7 +7,7 @@ LINKFLAGS += -L /usr/lib -lhscpp
 
 CFLAGS    = -O0 -fpermissive -g
 CC        = g++
-SRCS      = main.cpp ColorPicker.cpp
+SRCS      = Main.cpp Printer.cpp
 OBJS      = $(SRCS:.cpp=.o)
 PROG      = a0
 
