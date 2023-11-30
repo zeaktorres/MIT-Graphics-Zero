@@ -3,7 +3,9 @@
   "directory": "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero",
   "arguments": [
    "g++",
-   "-O2",
+   "-O0",
+   "-fpermissive",
+   "-g",
    "main.cpp",
    "-c",
    "-o",
@@ -11,8 +13,42 @@
    "-I",
    "/usr/include/GL",
    "-I",
-   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero"
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero",
+   "-I",
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/vecmath/",
+   "-I",
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include",
+   "-I",
+   "/usr/include/vecmath/",
+   "-I",
+   "/usr/include/hscpp/"
   ],
   "file": "main.cpp"
+ },
+ {
+  "directory": "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero",
+  "arguments": [
+   "g++",
+   "-O0",
+   "-fpermissive",
+   "-g",
+   "ColorPicker.cpp",
+   "-c",
+   "-o",
+   "ColorPicker.o",
+   "-I",
+   "/usr/include/GL",
+   "-I",
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero",
+   "-I",
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/vecmath/",
+   "-I",
+   "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include",
+   "-I",
+   "/usr/include/vecmath/",
+   "-I",
+   "/usr/include/hscpp/"
+  ],
+  "file": "ColorPicker.cpp"
  }
 ]

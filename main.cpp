@@ -1,6 +1,10 @@
 
 #include <GL/glut.h>
-#include <vecmath.h>
+#include <hscpp/Filesystem.h>
+#include <hscpp/Hotswapper.h>
+#include <hscpp/Util.h>
+#include <hscpp/module/SwapInfo.h>
+#include <vecmath/vecmath.h>
 
 #include <chrono>
 #include <cmath>
@@ -10,20 +14,20 @@
 #include <vector>
 
 #include "include/ColorPicker.h"
+#include "include/KeboardEvents.h"
+#include "include/LightPicker.h"
 #include "include/SimpleDemoData.h"
-#include "simple-demo/Filesystem.h"
-#include "simple-demo/Hotswapper.h"
-#include "simple-demo/Util.h"
-#include "simple-demo/hscpp/module/SwapInfo.h"
 using namespace std;
 
 // Globals
+KeyboardEvents *keyboardEventManager = new KeyboardEvents();
+typedef void (ColorPicker::*Update)(int *colorChoice);
 hscpp::Hotswapper *globalSwapper;
 auto srcPath = "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero";
 auto includePath =
     "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include";
 SimpleDemoData dataColorPickers;
-
+LightPicker *lightPicker;
 // This is the list of points (3D vectors)
 vector<Vector3f> vecv;
 
@@ -55,7 +59,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
       break;
     case 'c':
       // add code to change color here
-      dataColorPickers.colorPickers.at(0)->Update(&colorChoice);
+      keyboardEventManager->emit("cPress", 1);
       break;
     default:
       cout << "Unhandled key press " << key << "." << endl;
@@ -71,19 +75,19 @@ void specialFunc(int key, int x, int y) {
   switch (key) {
     case GLUT_KEY_UP:
       // add code to change light position
-      cout << "Unhandled key press: up arrow." << endl;
+      lightPicker->UpdateSecond(0.5);
       break;
     case GLUT_KEY_DOWN:
       // add code to change light position
-      cout << "Unhandled key press: down arrow." << endl;
+      lightPicker->UpdateSecond(-0.5);
       break;
     case GLUT_KEY_LEFT:
       // add code to change light position
-      cout << "Unhandled key press: left arrow." << endl;
+      lightPicker->UpdateFirst(-0.5);
       break;
     case GLUT_KEY_RIGHT:
       // add code to change light position
-      cout << "Unhandled key press: right arrow." << endl;
+      lightPicker->UpdateFirst(0.5);
       break;
   }
 
@@ -115,8 +119,9 @@ void drawScene(void) {
                               {0.3, 0.8, 0.9, 1.0}};
 
   // Here we use the first color entry as the diffuse color
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,
-               diffColors[colorChoice]);
+  glMaterialfv(
+      GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,
+      diffColors[dataColorPickers.colorPickers.at(0)->getColorChoice()]);
 
   // Define specular color and shininess
   GLfloat specColor[] = {1.0, 1.0, 1.0, 1.0};
@@ -131,10 +136,9 @@ void drawScene(void) {
   // Light color (RGBA)
   GLfloat Lt0diff[] = {1.0, 1.0, 1.0, 1.0};
   // Light position
-  GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
   glLightfv(GL_LIGHT0, GL_DIFFUSE, Lt0diff);
-  glLightfv(GL_LIGHT0, GL_POSITION, Lt0pos);
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPicker->getLightPosition());
 
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
@@ -175,15 +179,20 @@ void loadInput() {
 // Main routine.
 // Set up OpenGL, define the callbacks and start the main loop
 int main(int argc, char **argv) {
+  // Setup keyboard events
   hscpp::Hotswapper swapper;
   swapper.AddSourceDirectory(srcPath);
   swapper.AddIncludeDirectory(includePath);
   swapper.SetGlobalUserData(&dataColorPickers);
   dataColorPickers.colorPickers.at(0) =
       swapper.GetAllocationResolver()->Allocate<ColorPicker>();
-  dataColorPickers.colorPickers.at(0)->Init("ColorPickerA", 0);
-
+  dataColorPickers.colorPickers.at(0)->Init(0, 0);
+  keyboardEventManager->on(
+      "cPress", [&]() { dataColorPickers.colorPickers.at(0)->Update(1); });
   globalSwapper = &swapper;
+  lightPicker = swapper.GetAllocationResolver()->Allocate<LightPicker>();
+  GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
+  lightPicker->Init(Lt0pos, 0);
   loadInput();
 
   glutInit(&argc, argv);

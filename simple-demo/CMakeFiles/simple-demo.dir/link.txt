@@ -1,1 +1,0 @@
-/usr/bin/c++ "CMakeFiles/simple-demo.dir/src/Main.cpp.o" "CMakeFiles/simple-demo.dir/src/Printer.cpp.o" -o simple-demo  -lhscpp 

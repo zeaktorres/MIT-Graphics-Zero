@@ -1,10 +1,6 @@
-#include "include/ColorPicker.h"
+#include "include/LightPicker.h"
 
-#include <iostream>
-
-#include "include/SimpleDemoData.h"
-
-ColorPicker::ColorPicker() {
+LightPicker::LightPicker() {
   // The default constructor is called on a runtime swap. You can set a callback
   // method to execute right before and right after an object has been swapped,
   // and serialize data.
@@ -14,21 +10,17 @@ ColorPicker::ColorPicker() {
         // This object is about to be deleted, so serialize out its state. Any
         // type can be serialized so long as it has a default constructor and is
         // copyable.
-        info.Serialize("ColorChoice", m_ColorChoice);
+        info.Serialize("LightPosition", m_Lt0pos);
 
         info.Serialize("Index", m_Index);
         break;
       case hscpp::SwapPhase::AfterSwap:
         // This object has just been created, replacing an older version.
-        info.Unserialize("ColorChoice", m_ColorChoice);
+        info.Unserialize("LightPosition", m_Lt0pos);
 
         info.Unserialize("Index", m_Index);
         // This new object is in a new dynamic library, but it still has access
         // to global data in GlobalUserData.
-        SimpleDemoData *pDemoData =
-            hscpp::GlobalUserData::GetAs<SimpleDemoData>();
-
-        pDemoData->colorPickers.at(m_Index) = this;
 
         break;
     }
@@ -41,15 +33,11 @@ ColorPicker::ColorPicker() {
   Hscpp_SetSwapHandler(cb);
 }
 
-void ColorPicker::Init(const int colorChoice, int index) {
-  m_ColorChoice = colorChoice;
+void LightPicker::Init(GLfloat Lt0pos[], int index) {
+  m_Lt0pos = Lt0pos;
   m_Index = index;
 }
+void LightPicker::UpdateFirst(float value) { m_Lt0pos[0] += value; }
+void LightPicker::UpdateSecond(float value) { m_Lt0pos[1] += value; }
 
-void ColorPicker::Update(int colorIncrement) {
-  // Make a change here and save to see the results live!
-  m_ColorChoice += 1;
-  m_ColorChoice %= 4;
-}
-
-int ColorPicker::getColorChoice() { return m_ColorChoice; }
+GLfloat *LightPicker::getLightPosition() { return m_Lt0pos; }
