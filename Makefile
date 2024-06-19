@@ -4,8 +4,6 @@ INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/vecmath/
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 INCFLAGS += -I /usr/include/vecmath/ 
 
-LINKFLAGS  = -lglut -lGL -lGLU
-LINKFLAGS += -L /mit/6.837/public/lib -lvecmath
 LINKFLAGS += -L /usr/lib 
 
 CFLAGS    = -O0 -fpermissive -g
@@ -17,13 +15,16 @@ PROG      = a0
 all: $(SRCS) $(PROG)
 
 $(PROG): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS) -lglut -lGL -lGLU
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -c -o $@ $(INCFLAGS)
 
 depend:
 	makedepend $(INCFLAGS) -Y $(SRCS)
+
+windows: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS) -lfreeglut -lopengl32 -lglu32
 
 clean:
 	rm $(OBJS) $(PROG)
