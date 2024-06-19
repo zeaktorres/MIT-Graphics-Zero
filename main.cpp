@@ -1,9 +1,13 @@
 
 #include <GL/glut.h>
 #include <vecmath/vecmath.h>
+#include <vecmath/Vector3f.h>
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include "include/ColorPicker.h"
@@ -163,6 +167,34 @@ void reshapeFunc(int w, int h) {
 
 void loadInput() {
   // load the OBJ file here
+    std::string fileName = "torus.obj";
+
+    std::ifstream inFile(fileName);
+
+    if (inFile.is_open()) {
+        std::string line;
+
+        while (std::getline(inFile, line)) {
+            if (line.length() == 0)
+                return;
+
+            std::string token;
+            std::vector<std::string> tokens;
+            while (std::getline(std::stringstream(line), token, ' ')) {
+                tokens.push_back(token);
+            }
+
+            if (tokens[0][0] == 'v') {
+                vecv.push_back(Vector3f(std::stof(&token[1]),
+                            std::stof(&token[2]), std::stof(&token[3])));
+            }
+
+            if (tokens[0][0] == 'v' && tokens[0][1] == 'n') {
+                vecn.push_back(Vector3f(std::stof(&token[1]),
+                            std::stof(&token[2]), std::stof(&token[3])));
+            }
+        }
+    }
 }
 
 // Main routine.

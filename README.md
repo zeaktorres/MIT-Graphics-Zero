@@ -9,9 +9,8 @@ LightPicker handles the light choice
 
 
 # TODO
-1. [] Cleanup light and color picker names
+1. [] Implement 2.3
 2. [] Use keyboard event manager for arrow keys
-2. [] Implement 2.3
 
 # To install
 Get Vecmath online:
