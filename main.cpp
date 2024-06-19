@@ -10,9 +10,11 @@
 #include <string>
 #include <vector>
 
+#include "gl.h"
 #include "include/ColorPicker.h"
 #include "include/KeboardEvents.h"
 #include "include/LightPicker.h"
+#include "include/Face.h"
 
 // Globals
 KeyboardEvents *keyboardEventManager = new KeyboardEvents();
@@ -29,7 +31,7 @@ std::vector<Vector3f> vecv;
 std::vector<Vector3f> vecn;
 
 // This is the list of faces (indices into vecv and vecn)
-std::vector<std::vector<std::vector<unsigned>>> vecf;
+std::vector<Face> vecf;
 
 // Color picker
 int colorChoice = 0;
@@ -135,7 +137,16 @@ void drawScene(void) {
 
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
-  glutSolidTeapot(1.0);
+  for ( Face face : vecf ) {
+      glBegin(GL_TRIANGLES);
+      glNormal3d(vecn[face.c-1][0], vecn[face.c-1][1], vecn[face.c-1][2]);
+      glVertex3d(vecv[face.a-1][0], vecv[face.a-1][1], vecv[face.a-1][2]);
+      glNormal3d(vecn[face.f-1][0], vecn[face.f-1][1], vecn[face.f-1][2]);
+      glVertex3d(vecv[face.d-1][0], vecv[face.d-1][1], vecv[face.d-1][2]);
+      glNormal3d(vecn[face.i-1][0], vecn[face.i-1][1], vecn[face.i-1][2]);
+      glVertex3d(vecv[face.g-1][0], vecv[face.g-1][1], vecv[face.g-1][2]);
+      glEnd();
+  }
 
   // Dump the image to the screen.
   glutSwapBuffers();
@@ -186,27 +197,28 @@ void loadInput() {
             }
 
             if (tokens[0][0] == 'v') {
-                vecv.push_back(Vector3f(std::stof(&token[1]),
-                            std::stof(&token[2]), std::stof(&token[3])));
+                vecv.push_back(Vector3f(std::stof(tokens[1]),
+                            std::stof(tokens[2]), std::stof(tokens[3])));
             }
 
             if (tokens[0][0] == 'f') {
-                std::vector<std::vector<unsigned>> face;
+                std::vector<unsigned> face;
                 for (int i = 1; i < tokens.size(); i++) {
                     std::stringstream readFaceLine(tokens[i]);
                     std::string faceVN;
-                    std::vector<unsigned> faceVNs;
                     while (std::getline(readFaceLine, faceVN, '/')) {
-                        faceVNs.push_back(std::stoi(faceVN));
+                        face.push_back(std::stoi(faceVN));
                     }
-                    face.push_back(faceVNs);
                 }
-                vecf.push_back(face);
+
+                vecf.push_back(Face(face[0], face[1], face[2],
+                            face[3], face[4], face[5],
+                            face[6], face[7], face[8]));
             }
 
             if (tokens[0][0] == 'v' && tokens[0][1] == 'n') {
-                vecn.push_back(Vector3f(std::stof(&token[1]),
-                            std::stof(&token[2]), std::stof(&token[3])));
+                vecn.push_back(Vector3f(std::stof(tokens[1]),
+                            std::stof(tokens[2]), std::stof(tokens[3])));
             }
         }
     }
