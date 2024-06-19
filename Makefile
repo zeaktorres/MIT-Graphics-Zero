@@ -1,9 +1,8 @@
 INCFLAGS  = -I /usr/include/GL
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 INCFLAGS += -I /usr/include/vecmath/ 
-INCFLAGS += -I  "C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath"
 	
-LINKFLAGS += -L /usr/lib "C:\msys64\usr\lib" -lvecmath
+LINKFLAGS += -L"C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath\output"
 CFLAGS    = -O0 -fpermissive -g
 CC        = g++
 SRCS      = main.cpp ColorPicker.cpp KeyboardEvents.cpp LightPicker.cpp
@@ -22,7 +21,7 @@ depend:
 	makedepend $(INCFLAGS) -Y $(SRCS)
 
 windows: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS) -lfreeglut -lopengl32 -lglu32 
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS) -lfreeglut -lopengl32 -lglu32 -lvecmath
 clean:
 	rm $(OBJS) $(PROG)
 
