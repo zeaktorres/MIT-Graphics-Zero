@@ -2,7 +2,7 @@ INCFLAGS  = -I /usr/include/GL
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 INCFLAGS += -I /usr/include/vecmath/ 
 	
-	LINKFLAGS += -L"C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath\"
+LINKFLAGS += -L"C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath\"
 CFLAGS    = -O0 -fpermissive -g
 CC        = g++
 SRCS      = main.cpp ColorPicker.cpp KeyboardEvents.cpp LightPicker.cpp
