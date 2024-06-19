@@ -4,6 +4,3 @@
 
 #include "ColorPicker.h"
 
-struct SimpleDemoData {
-  std::vector<ColorPicker *> colorPickers = {nullptr};
-};

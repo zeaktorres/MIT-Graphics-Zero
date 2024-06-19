@@ -1,41 +1,31 @@
 
 #include <GL/glut.h>
-#include <hscpp/Filesystem.h>
-#include <hscpp/Hotswapper.h>
-#include <hscpp/Util.h>
-#include <hscpp/module/SwapInfo.h>
 #include <vecmath/vecmath.h>
 
-#include <chrono>
 #include <cmath>
 #include <iostream>
-#include <sstream>
-#include <thread>
 #include <vector>
 
 #include "include/ColorPicker.h"
 #include "include/KeboardEvents.h"
 #include "include/LightPicker.h"
-#include "include/SimpleDemoData.h"
-using namespace std;
 
 // Globals
 KeyboardEvents *keyboardEventManager = new KeyboardEvents();
 typedef void (ColorPicker::*Update)(int *colorChoice);
-hscpp::Hotswapper *globalSwapper;
 auto srcPath = "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero";
 auto includePath =
     "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include";
-SimpleDemoData dataColorPickers;
+ColorPicker dataColorPickers;
 LightPicker *lightPicker;
 // This is the list of points (3D vectors)
-vector<Vector3f> vecv;
+std::vector<Vector3f> vecv;
 
 // This is the list of normals (also 3D vectors)
-vector<Vector3f> vecn;
+std::vector<Vector3f> vecn;
 
 // This is the list of faces (indices into vecv and vecn)
-vector<vector<unsigned>> vecf;
+std::vector<std::vector<unsigned>> vecf;
 
 // Color picker
 int colorChoice = 0;
@@ -52,7 +42,6 @@ inline void glNormal(const GLfloat *a) { glNormal3fv(a); }
 // This function is called whenever a "Normal" key press iutPostRedisplay after
 // the update, whis received.
 void keyboardFunc(unsigned char key, int x, int y) {
-  globalSwapper->Update();
   switch (key) {
     case 27:  // Escape key
       exit(0);
@@ -62,7 +51,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
       keyboardEventManager->emit("cPress", 1);
       break;
     default:
-      cout << "Unhandled key press " << key << "." << endl;
+      std::cout << "Unhandled key press " << key << "." << std::endl;
   }
 
   // this will refresh the screen so that the user sees the color change
@@ -121,7 +110,7 @@ void drawScene(void) {
   // Here we use the first color entry as the diffuse color
   glMaterialfv(
       GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,
-      diffColors[dataColorPickers.colorPickers.at(0)->getColorChoice()]);
+      diffColors[dataColorPickers.getColorChoice()]);
 
   // Define specular color and shininess
   GLfloat specColor[] = {1.0, 1.0, 1.0, 1.0};
@@ -180,18 +169,10 @@ void loadInput() {
 // Set up OpenGL, define the callbacks and start the main loop
 int main(int argc, char **argv) {
   // Setup keyboard events
-  hscpp::Hotswapper swapper;
-  swapper.AddSourceDirectory(srcPath);
-  swapper.AddIncludeDirectory(includePath);
-  swapper.SetGlobalUserData(&dataColorPickers);
-  dataColorPickers.colorPickers.at(0) =
-      swapper.GetAllocationResolver()->Allocate<ColorPicker>();
-  dataColorPickers.colorPickers.at(0)->Init(0, 0);
-  keyboardEventManager->on(
-      "cPress", [&]() { dataColorPickers.colorPickers.at(0)->Update(1); });
-  globalSwapper = &swapper;
-  lightPicker = swapper.GetAllocationResolver()->Allocate<LightPicker>();
+  keyboardEventManager->on("cPress", [&]() { dataColorPickers.Update(1); });
+
   GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
+  lightPicker = new LightPicker();
   lightPicker->Init(Lt0pos, 0);
   loadInput();
 

@@ -3,11 +3,10 @@ INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/vecmath/
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 INCFLAGS += -I /usr/include/vecmath/ 
-INCFLAGS += -I /usr/include/hscpp/ 
 
 LINKFLAGS  = -lglut -lGL -lGLU
 LINKFLAGS += -L /mit/6.837/public/lib -lvecmath
-LINKFLAGS += -L /usr/lib -lhscpp
+LINKFLAGS += -L /usr/lib 
 
 CFLAGS    = -O0 -fpermissive -g
 CC        = g++
