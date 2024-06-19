@@ -1,6 +1,7 @@
 INCFLAGS  = -I /usr/include/GL
 INCFLAGS += -I /home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include
 INCFLAGS += -I /usr/include/vecmath/ 
+INCFLAGS += -I "C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath"
 
 LINKFLAGS += -L /usr/lib -lvecmath
 
@@ -22,8 +23,7 @@ depend:
 	makedepend $(INCFLAGS) -Y $(SRCS)
 
 windows: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) $(LINKFLAGS) -lfreeglut -lopengl32 -lglu32
-
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(INCFLAGS) -I "C:\Users\torre\Desktop\MIT-Graphics-Zero\vecmath" $(LINKFLAGS) -lfreeglut -lopengl32 -lglu32 
 clean:
 	rm $(OBJS) $(PROG)
 
