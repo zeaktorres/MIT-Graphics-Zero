@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 
-#include "gl.h"
 #include "include/ColorPicker.h"
 #include "include/KeboardEvents.h"
 #include "include/LightPicker.h"
