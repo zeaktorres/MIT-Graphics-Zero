@@ -195,12 +195,12 @@ void loadInput() {
                 tokens.push_back(token);
             }
 
-            if (tokens[0][0] == 'v') {
+            if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
                 vecv.push_back(Vector3f(std::stof(tokens[1]),
                             std::stof(tokens[2]), std::stof(tokens[3])));
             }
 
-            if (tokens[0][0] == 'f') {
+            if (tokens[0].length() == 1 && tokens[0][0] == 'f') {
                 std::vector<unsigned> face;
                 for (int i = 1; i < tokens.size(); i++) {
                     std::stringstream readFaceLine(tokens[i]);
@@ -215,7 +215,7 @@ void loadInput() {
                             face[6], face[7], face[8]));
             }
 
-            if (tokens[0][0] == 'v' && tokens[0][1] == 'n') {
+            if (tokens[0].length() == 2 && tokens[0][0] == 'v' && tokens[0][1] == 'n') {
                 vecn.push_back(Vector3f(std::stof(tokens[1]),
                             std::stof(tokens[2]), std::stof(tokens[3])));
             }
