@@ -29,7 +29,7 @@ std::vector<Vector3f> vecv;
 std::vector<Vector3f> vecn;
 
 // This is the list of faces (indices into vecv and vecn)
-std::vector<std::vector<unsigned>> vecf;
+std::vector<std::vector<std::vector<unsigned>>> vecf;
 
 // Color picker
 int colorChoice = 0;
@@ -176,17 +176,32 @@ void loadInput() {
 
         while (std::getline(inFile, line)) {
             if (line.length() == 0)
-                return;
+                continue;
 
             std::string token;
             std::vector<std::string> tokens;
-            while (std::getline(std::stringstream(line), token, ' ')) {
+            std::stringstream readLine(line);
+            while (std::getline(readLine, token, ' ')) {
                 tokens.push_back(token);
             }
 
             if (tokens[0][0] == 'v') {
                 vecv.push_back(Vector3f(std::stof(&token[1]),
                             std::stof(&token[2]), std::stof(&token[3])));
+            }
+
+            if (tokens[0][0] == 'f') {
+                std::vector<std::vector<unsigned>> face;
+                for (int i = 1; i < tokens.size(); i++) {
+                    std::stringstream readFaceLine(tokens[i]);
+                    std::string faceVN;
+                    std::vector<unsigned> faceVNs;
+                    while (std::getline(readFaceLine, faceVN, '/')) {
+                        faceVNs.push_back(std::stoi(faceVN));
+                    }
+                    face.push_back(faceVNs);
+                }
+                vecf.push_back(face);
             }
 
             if (tokens[0][0] == 'v' && tokens[0][1] == 'n') {
