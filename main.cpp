@@ -1,7 +1,7 @@
 
 #include <GL/glut.h>
-#include <vecmath/vecmath.h>
-#include <vecmath/Vector3f.h>
+#include "vecmath/vecmath.h"
+#include "vecmath/Vector3f.h"
 
 #include <cmath>
 #include <fstream>
