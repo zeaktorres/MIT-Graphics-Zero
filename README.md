@@ -14,7 +14,9 @@ LightPicker handles the light choice
 2. [] Use keyboard event manager for arrow keys
 
 # To install
-Get Vecmath online:
-https://github.com/ydm/mit-vecmath
+Make it
+On windows, you'll need msys2 and the corresponding opengl libaries functions. Then, run "make windows"
 
-Make it, and "make install" it
+# Extra credit
+1. [X] Rotate model
+

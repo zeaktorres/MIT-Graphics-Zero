@@ -1,5 +1,7 @@
 
 #include <GL/glut.h>
+#include "freeglut_std.h"
+#include "gl.h"
 #include "vecmath/vecmath.h"
 #include "vecmath/Vector3f.h"
 
@@ -23,6 +25,7 @@ auto includePath =
     "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero/include";
 ColorPicker dataColorPickers;
 LightPicker *lightPicker;
+unsigned *angle = new  unsigned(50);
 // This is the list of points (3D vectors)
 std::vector<Vector3f> vecv;
 
@@ -31,6 +34,8 @@ std::vector<Vector3f> vecn;
 
 // This is the list of faces (indices into vecv and vecn)
 std::vector<Face> vecf;
+
+bool rotating = false;
 
 // Color picker
 int colorChoice = 0;
@@ -54,6 +59,9 @@ void keyboardFunc(unsigned char key, int x, int y) {
     case 'c':
       // add code to change color here
       keyboardEventManager->emit("cPress", 1);
+      break;
+    case 'r':
+      rotating = !rotating;
       break;
     default:
       std::cout << "Unhandled key press " << key << "." << std::endl;
@@ -102,7 +110,7 @@ void drawScene(void) {
 
   // Position the camera at [0,0,5], looking at [0,0,0],
   // with [0,1,0] as the up direction.
-  gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  gluLookAt(0, 0, 5, 0.0, 0.0, 0.0, 0.0, 1, 0.0);
 
   // Set material properties of object
 
@@ -136,6 +144,7 @@ void drawScene(void) {
 
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
+  glRotatef(*angle, 0.0f, 1.0f, 0.0f);
   for ( Face face : vecf ) {
       glBegin(GL_TRIANGLES);
       glNormal3d(vecn[face.c-1][0], vecn[face.c-1][1], vecn[face.c-1][2]);
@@ -175,55 +184,63 @@ void reshapeFunc(int w, int h) {
   gluPerspective(50.0, 1.0, 1.0, 100.0);
 }
 
+
 void loadInput() {
   // load the OBJ file here
     std::string fileName = "torus.obj";
 
     std::ifstream inFile(fileName);
 
-    if (inFile.is_open()) {
-        std::string line;
+    const int BUFF_SIZE = 1024;
+    char line[BUFF_SIZE];
 
-        while (std::getline(inFile, line)) {
-            if (line.length() == 0)
-                continue;
+    while (std::cin.getline(line, BUFF_SIZE)) {
+        std::string lineString(line);
+        if (lineString.length() == 0)
+            continue;
+        std::string token;
+        std::vector<std::string> tokens;
+        std::stringstream readLine(lineString);
+        while (std::getline(readLine, token, ' ')) {
+            tokens.push_back(token);
+        }
 
-            std::string token;
-            std::vector<std::string> tokens;
-            std::stringstream readLine(line);
-            while (std::getline(readLine, token, ' ')) {
-                tokens.push_back(token);
-            }
+        if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
+            vecv.push_back(Vector3f(std::stof(tokens[1]),
+                        std::stof(tokens[2]), std::stof(tokens[3])));
+        }
 
-            if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
-                vecv.push_back(Vector3f(std::stof(tokens[1]),
-                            std::stof(tokens[2]), std::stof(tokens[3])));
-            }
-
-            if (tokens[0].length() == 1 && tokens[0][0] == 'f') {
-                std::vector<unsigned> face;
-                for (int i = 1; i < tokens.size(); i++) {
-                    std::stringstream readFaceLine(tokens[i]);
-                    std::string faceVN;
-                    while (std::getline(readFaceLine, faceVN, '/')) {
-                        face.push_back(std::stoi(faceVN));
-                    }
+        if (tokens[0].length() == 1 && tokens[0][0] == 'f') {
+            std::vector<unsigned> face;
+            for (int i = 1; i < tokens.size(); i++) {
+                std::stringstream readFaceLine(tokens[i]);
+                std::string faceVN;
+                while (std::getline(readFaceLine, faceVN, '/')) {
+                    face.push_back(std::stoi(faceVN));
                 }
-
-                vecf.push_back(Face(face[0], face[1], face[2],
-                            face[3], face[4], face[5],
-                            face[6], face[7], face[8]));
             }
 
-            if (tokens[0].length() == 2 && tokens[0][0] == 'v' && tokens[0][1] == 'n') {
-                vecn.push_back(Vector3f(std::stof(tokens[1]),
-                            std::stof(tokens[2]), std::stof(tokens[3])));
-            }
+            vecf.push_back(Face(face[0], face[1], face[2],
+                        face[3], face[4], face[5],
+                        face[6], face[7], face[8]));
+        }
+
+        if (tokens[0].length() == 2 &&
+                tokens[0][0] == 'v' && tokens[0][1] == 'n') {
+            vecn.push_back(Vector3f(std::stof(tokens[1]),
+                        std::stof(tokens[2]), std::stof(tokens[3])));
         }
     }
 }
 
-// Main routine.
+void increaseAngle(int _value) {
+    if (*angle >= 359)
+        *angle = 0;
+    if (rotating)
+        *angle += 1;
+    glutPostRedisplay();
+    glutTimerFunc(20, increaseAngle, 0);
+}
 // Set up OpenGL, define the callbacks and start the main loop
 int main(int argc, char **argv) {
   // Setup keyboard events
@@ -235,6 +252,7 @@ int main(int argc, char **argv) {
   loadInput();
 
   glutInit(&argc, argv);
+  glutTimerFunc(20, increaseAngle, 0);
 
   // We're going to animate it, so double buffer
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
