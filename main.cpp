@@ -43,7 +43,7 @@ struct Vertex {
     float x, y, z;
     float nx, ny, nz;
 };
-std::vector<Vertex> vecvn;
+std::vector<Vertex*> *vecvn = new std::vector<Vertex*>();
 
 // This is the list of faces (indices into vecv and vecn)
 std::vector<unsigned int> vecf;
@@ -216,10 +216,10 @@ void loadInput() {
         }
 
         if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
-            vecvn.push_back(Vertex());
-            vecvn[vectorCount].x = std::stof(tokens[1]);
-            vecvn[vectorCount].y = std::stof(tokens[2]);
-            vecvn[vectorCount].z = std::stof(tokens[3]);
+            vecvn->push_back(new Vertex());
+            (*vecvn)[vectorCount]->x = std::stof(tokens[1]);
+            (*vecvn)[vectorCount]->y = std::stof(tokens[2]);
+            (*vecvn)[vectorCount]->z = std::stof(tokens[3]);
             vecv.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
             vectorCount++;
@@ -239,9 +239,9 @@ void loadInput() {
                 tokens[0][0] == 'v' && tokens[0][1] == 'n') {
             vecn.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
-            vecvn[vectorCount].nx = std::stof(tokens[1]);
-            vecvn[vectorCount].ny = std::stof(tokens[2]);
-            vecvn[vectorCount].nz = std::stof(tokens[3]);
+            (*vecvn)[normalCount]->nx = std::stof(tokens[1]);
+            (*vecvn)[normalCount]->ny = std::stof(tokens[2]);
+            (*vecvn)[normalCount]->nz = std::stof(tokens[3]);
             normalCount++;
         }
     }
@@ -257,12 +257,13 @@ void loadInput() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vecvn.size(),
-            &(vecvn.at(0)), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vecvn->size(),
+            &(vecvn->at(0)), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            vecf.size() * sizeof(unsigned int), &(vecvn.at(0)), GL_STATIC_DRAW);
+            vecf.size() * sizeof(unsigned int),
+            &(vecvn->at(0)), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT,
