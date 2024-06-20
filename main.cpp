@@ -1,11 +1,13 @@
 
-#include <GL/glut.h>
+#include <GL/glew.h>
+#include <GL/freeglut.h>
 #include "freeglut_std.h"
 #include "gl.h"
-#include "vecmath/vecmath.h"
+#include "glext.h"
 #include "vecmath/Vector3f.h"
 
 #include <cmath>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -18,6 +20,7 @@
 #include "include/Face.h"
 
 // Globals
+#define BUFFER_OFFSET(i) ((void*)(i))
 KeyboardEvents *keyboardEventManager = new KeyboardEvents();
 typedef void (ColorPicker::*Update)(int *colorChoice);
 auto srcPath = "/home/zeak/Projects/MIT-Computer-Graphics-Linux/zero";
@@ -26,14 +29,24 @@ auto includePath =
 ColorPicker dataColorPickers;
 LightPicker *lightPicker;
 unsigned *angle = new  unsigned(50);
+unsigned int VAO;
+unsigned int VBO, EBO;
 // This is the list of points (3D vectors)
 std::vector<Vector3f> vecv;
 
 // This is the list of normals (also 3D vectors)
 std::vector<Vector3f> vecn;
 
+// This is the list of vectors and normals
+// (have to weave the data together for VBOs)
+struct Vertex {
+    float x, y, z;
+    float nx, ny, nz;
+};
+std::vector<Vertex> vecvn;
+
 // This is the list of faces (indices into vecv and vecn)
-std::vector<Face> vecf;
+std::vector<unsigned int> vecf;
 
 bool rotating = false;
 
@@ -145,16 +158,9 @@ void drawScene(void) {
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
   glRotatef(*angle, 0.0f, 1.0f, 0.0f);
-  for ( Face face : vecf ) {
-      glBegin(GL_TRIANGLES);
-      glNormal3d(vecn[face.c-1][0], vecn[face.c-1][1], vecn[face.c-1][2]);
-      glVertex3d(vecv[face.a-1][0], vecv[face.a-1][1], vecv[face.a-1][2]);
-      glNormal3d(vecn[face.f-1][0], vecn[face.f-1][1], vecn[face.f-1][2]);
-      glVertex3d(vecv[face.d-1][0], vecv[face.d-1][1], vecv[face.d-1][2]);
-      glNormal3d(vecn[face.i-1][0], vecn[face.i-1][1], vecn[face.i-1][2]);
-      glVertex3d(vecv[face.g-1][0], vecv[face.g-1][1], vecv[face.g-1][2]);
-      glEnd();
-  }
+  glBindVertexArray(VAO);
+  glDrawElements(GL_TRIANGLES, vecf.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+  glBindVertexArray(0);
 
   // Dump the image to the screen.
   glutSwapBuffers();
@@ -193,9 +199,13 @@ void loadInput() {
 
     const int BUFF_SIZE = 1024;
     char line[BUFF_SIZE];
+    unsigned vectorCount = 0;
+    unsigned normalCount = 0;
+    std::string lineString;
 
-    while (std::cin.getline(line, BUFF_SIZE)) {
-        std::string lineString(line);
+    // while (std::cin.getline(line, BUFF_SIZE)) {
+    while (std::getline(inFile, lineString)) {
+        // std::string lineString(line);
         if (lineString.length() == 0)
             continue;
         std::string token;
@@ -206,31 +216,63 @@ void loadInput() {
         }
 
         if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
+            vecvn.push_back(Vertex());
+            vecvn[vectorCount].x = std::stof(tokens[1]);
+            vecvn[vectorCount].y = std::stof(tokens[2]);
+            vecvn[vectorCount].z = std::stof(tokens[3]);
             vecv.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
+            vectorCount++;
         }
 
         if (tokens[0].length() == 1 && tokens[0][0] == 'f') {
-            std::vector<unsigned> face;
             for (int i = 1; i < tokens.size(); i++) {
                 std::stringstream readFaceLine(tokens[i]);
                 std::string faceVN;
                 while (std::getline(readFaceLine, faceVN, '/')) {
-                    face.push_back(std::stoi(faceVN));
+                    vecf.push_back(std::stoi(faceVN));
                 }
             }
-
-            vecf.push_back(Face(face[0], face[1], face[2],
-                        face[3], face[4], face[5],
-                        face[6], face[7], face[8]));
         }
 
         if (tokens[0].length() == 2 &&
                 tokens[0][0] == 'v' && tokens[0][1] == 'n') {
             vecn.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
+            vecvn[vectorCount].nx = std::stof(tokens[1]);
+            vecvn[vectorCount].ny = std::stof(tokens[2]);
+            vecvn[vectorCount].nz = std::stof(tokens[3]);
+            normalCount++;
         }
     }
+
+    std::cout << sizeof(vecv);
+    std::cout << sizeof(vecn);
+    glewInit();
+    glGenVertexArrays(1, &VAO);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vecvn.size(),
+            &vecvn[0].x, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+            vecf.size() * sizeof(unsigned int), &vecf[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT,
+            GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(0));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT,
+            GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(12));
+
+    glBindVertexArray(0);
 }
 
 void increaseAngle(int _value) {
@@ -249,10 +291,11 @@ int main(int argc, char **argv) {
   GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
   lightPicker = new LightPicker();
   lightPicker->Init(Lt0pos, 0);
-  loadInput();
 
   glutInit(&argc, argv);
+
   glutTimerFunc(20, increaseAngle, 0);
+
 
   // We're going to animate it, so double buffer
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -262,6 +305,7 @@ int main(int argc, char **argv) {
   glutInitWindowSize(360, 360);
   glutCreateWindow("Assignment 0");
 
+  loadInput();
   // Initialize OpenGL parameters.
   initRendering();
 
@@ -275,7 +319,7 @@ int main(int argc, char **argv) {
   // Call this whenever window needs redrawing
   glutDisplayFunc(drawScene);
 
-  // Start the main loop.  glutMainLoop never returns.
+    // Start the main loop.  glutMainLoop never returns.
   glutMainLoop();
   return 0;
 }
