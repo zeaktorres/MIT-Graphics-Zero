@@ -158,10 +158,18 @@ void drawScene(void) {
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
   glRotatef(*angle, 0.0f, 1.0f, 0.0f);
-  glBindVertexArray(VAO);
-  glDrawElements(GL_TRIANGLES, vecf.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-  glBindVertexArray(0);
 
+  for (int i = 0; i < vecf.size(); i+= 9){
+      unsigned int a = vecf[i];
+      unsigned int d = vecf[i + 3];
+      unsigned int g = vecf[i + 6];
+
+      glBegin(GL_TRIANGLES);
+      glVertex3d(vecvn[a-1].x, vecvn[a-1].y, vecvn[a-1].z);
+      glVertex3d(vecvn[d-1].x, vecvn[d-1].y, vecvn[d-1].z);
+      glVertex3d(vecvn[g-1].x, vecvn[g-1].y, vecvn[g-1].z);
+      glEnd();
+  }
   // Dump the image to the screen.
   glutSwapBuffers();
 }
@@ -262,7 +270,7 @@ void loadInput() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            vecf.size() * sizeof(unsigned int), &(vecvn.at(0)), GL_STATIC_DRAW);
+            vecf.size() * sizeof(unsigned int), &(vecf.at(0)), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT,
