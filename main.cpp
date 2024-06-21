@@ -43,7 +43,7 @@ struct Vertex {
     GLfloat x, y, z;
     GLfloat nx, ny, nz;
 };
-Vertex vecvn[800];
+std::vector<Vertex> vecvn;
 
 // This is the list of faces (indices into vecv and vecn)
 std::vector<unsigned int> vecf;
@@ -209,7 +209,7 @@ void reshapeFunc(int w, int h) {
 
 void loadInput() {
   // load the OBJ file here
-    std::string fileName = "sphere.obj";
+    std::string fileName = "torus.obj";
 
     std::ifstream inFile(fileName);
 
@@ -232,6 +232,7 @@ void loadInput() {
         }
 
         if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
+            vecvn.push_back(Vertex());
             vecvn[vectorCount].x = std::stof(tokens[1]);
             vecvn[vectorCount].y = std::stof(tokens[2]);
             vecvn[vectorCount].z = std::stof(tokens[3]);
@@ -260,15 +261,6 @@ void loadInput() {
             normalCount++;
         }
     }
-    std::vector<float> data;
-    for (int i = 0; i < 800; i++) {
-        data.push_back(vecvn[i].x);
-        data.push_back(vecvn[i].y);
-        data.push_back(vecvn[i].z);
-        data.push_back(vecvn[i].nx);
-        data.push_back(vecvn[i].ny);
-        data.push_back(vecvn[i].nz);
-    }
 
     std::cout << sizeof(vecv);
     std::cout << sizeof(vecn);
@@ -283,7 +275,7 @@ void loadInput() {
 
 
     glBufferData(GL_ARRAY_BUFFER,
-            data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+            vecvn.size() * sizeof(float), &vecvn[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -300,7 +292,8 @@ void loadInput() {
     // Check for OpenGL errors
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
-        std::cerr << "OpenGL Error before draw calli while binding: " << error << std::endl;
+        std::cerr << "OpenGL Error before draw calli while binding: " 
+            << error << std::endl;
     }
 }
 
