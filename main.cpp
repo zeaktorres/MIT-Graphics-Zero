@@ -1,9 +1,9 @@
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include "freeglut_std.h"
 #include "gl.h"
 #include "glext.h"
+#include "glu.h"
 #include "vecmath/Vector3f.h"
 
 #include <cmath>
@@ -40,10 +40,10 @@ std::vector<Vector3f> vecn;
 // This is the list of vectors and normals
 // (have to weave the data together for VBOs)
 struct Vertex {
-    float x, y, z;
-    float nx, ny, nz;
+    GLfloat x, y, z;
+    GLfloat nx, ny, nz;
 };
-std::vector<Vertex*> *vecvn = new std::vector<Vertex*>();
+Vertex vecvn[800];
 
 // This is the list of faces (indices into vecv and vecn)
 std::vector<unsigned int> vecf;
@@ -158,11 +158,27 @@ void drawScene(void) {
   // This GLUT method draws a teapot.  You should replace
   // it with code which draws the object you loaded.
   glRotatef(*angle, 0.0f, 1.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // Bind the vertex array object
+
+  // Check for OpenGL errors
+  GLenum error = glGetError();
+  if (error != GL_NO_ERROR) {
+      std::cerr << "OpenGL Error before draw call: " << error << std::endl;
+  }
+
+  // Bind the element buffer object and draw
+
+  // Check for OpenGL errors after draw call
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, vecf.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+  error = glGetError();
+  if (error != GL_NO_ERROR) {
+      std::cerr << "OpenGL Error during draw call: " << error << std::endl;
+  }
   glBindVertexArray(0);
 
-  // Dump the image to the screen.
+  // Swap buffers (assuming glutSwapBuffers() handles this)
   glutSwapBuffers();
 }
 
@@ -193,7 +209,7 @@ void reshapeFunc(int w, int h) {
 
 void loadInput() {
   // load the OBJ file here
-    std::string fileName = "torus.obj";
+    std::string fileName = "sphere.obj";
 
     std::ifstream inFile(fileName);
 
@@ -216,10 +232,9 @@ void loadInput() {
         }
 
         if (tokens[0].length() == 1 && tokens[0][0] == 'v') {
-            vecvn->push_back(new Vertex());
-            (*vecvn)[vectorCount]->x = std::stof(tokens[1]);
-            (*vecvn)[vectorCount]->y = std::stof(tokens[2]);
-            (*vecvn)[vectorCount]->z = std::stof(tokens[3]);
+            vecvn[vectorCount].x = std::stof(tokens[1]);
+            vecvn[vectorCount].y = std::stof(tokens[2]);
+            vecvn[vectorCount].z = std::stof(tokens[3]);
             vecv.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
             vectorCount++;
@@ -239,11 +254,20 @@ void loadInput() {
                 tokens[0][0] == 'v' && tokens[0][1] == 'n') {
             vecn.push_back(Vector3f(std::stof(tokens[1]),
                         std::stof(tokens[2]), std::stof(tokens[3])));
-            (*vecvn)[normalCount]->nx = std::stof(tokens[1]);
-            (*vecvn)[normalCount]->ny = std::stof(tokens[2]);
-            (*vecvn)[normalCount]->nz = std::stof(tokens[3]);
+            vecvn[normalCount].nx = std::stof(tokens[1]);
+            vecvn[normalCount].ny = std::stof(tokens[2]);
+            vecvn[normalCount].nz = std::stof(tokens[3]);
             normalCount++;
         }
+    }
+    std::vector<float> data;
+    for (int i = 0; i < 800; i++) {
+        data.push_back(vecvn[i].x);
+        data.push_back(vecvn[i].y);
+        data.push_back(vecvn[i].z);
+        data.push_back(vecvn[i].nx);
+        data.push_back(vecvn[i].ny);
+        data.push_back(vecvn[i].nz);
     }
 
     std::cout << sizeof(vecv);
@@ -257,23 +281,27 @@ void loadInput() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vecvn->size(),
-            &(vecvn->at(0)), GL_STATIC_DRAW);
+
+    glBufferData(GL_ARRAY_BUFFER,
+            data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-            vecf.size() * sizeof(unsigned int),
-            &(vecvn->at(0)), GL_STATIC_DRAW);
+            vecf.size() * sizeof(unsigned int), &vecf[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT,
-            GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(0));
+            GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(0));
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT,
-            GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(12));
+            GL_FALSE, 6 * sizeof(float), BUFFER_OFFSET(3 * sizeof(float)));
 
-    glBindVertexArray(0);
+    // Check for OpenGL errors
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cerr << "OpenGL Error before draw calli while binding: " << error << std::endl;
+    }
 }
 
 void increaseAngle(int _value) {
