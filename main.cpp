@@ -31,11 +31,6 @@ LightPicker *lightPicker;
 unsigned *angle = new  unsigned(50);
 unsigned int VAO;
 unsigned int VBO, EBO;
-// This is the list of points (3D vectors)
-std::vector<Vector3f> vecv;
-
-// This is the list of normals (also 3D vectors)
-std::vector<Vector3f> vecn;
 
 // This is the list of vectors and normals
 // (have to weave the data together for VBOs)
@@ -236,8 +231,6 @@ void loadInput() {
             vecvn[vectorCount].x = std::stof(tokens[1]);
             vecvn[vectorCount].y = std::stof(tokens[2]);
             vecvn[vectorCount].z = std::stof(tokens[3]);
-            vecv.push_back(Vector3f(std::stof(tokens[1]),
-                        std::stof(tokens[2]), std::stof(tokens[3])));
             vectorCount++;
         }
 
@@ -253,8 +246,6 @@ void loadInput() {
 
         if (tokens[0].length() == 2 &&
                 tokens[0][0] == 'v' && tokens[0][1] == 'n') {
-            vecn.push_back(Vector3f(std::stof(tokens[1]),
-                        std::stof(tokens[2]), std::stof(tokens[3])));
             vecvn[normalCount].nx = std::stof(tokens[1]);
             vecvn[normalCount].ny = std::stof(tokens[2]);
             vecvn[normalCount].nz = std::stof(tokens[3]);
@@ -262,8 +253,6 @@ void loadInput() {
         }
     }
 
-    std::cout << sizeof(vecv);
-    std::cout << sizeof(vecn);
     glewInit();
     glGenVertexArrays(1, &VAO);
 
