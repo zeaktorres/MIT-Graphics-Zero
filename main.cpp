@@ -242,8 +242,8 @@ void loadInput() {
                 while (std::getline(readFaceLine, faceVN, '/')) {
                     if (faceCount == 0 || faceCount == 2 || faceCount == 3
                             || faceCount == 5 || faceCount == 6 || faceCount == 8) {
-                        faceCount++;
                         vecf.push_back(std::stoi(faceVN) - 1);
+                        faceCount++;
                     }
                 }
             }
