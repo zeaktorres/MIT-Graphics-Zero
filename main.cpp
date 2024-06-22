@@ -238,9 +238,13 @@ void loadInput() {
             for (int i = 1; i < tokens.size(); i++) {
                 std::stringstream readFaceLine(tokens[i]);
                 std::string faceVN;
+                int faceCount;
                 while (std::getline(readFaceLine, faceVN, '/')) {
-                    vecf.push_back(std::stoi(faceVN) - 1);
-                    break;
+                    if (faceCount == 0 || faceCount == 2 || faceCount == 3
+                            || faceCount == 5 || faceCount == 6 || faceCount == 8) {
+                        faceCount++;
+                        vecf.push_back(std::stoi(faceVN) - 1);
+                    }
                 }
             }
         }
