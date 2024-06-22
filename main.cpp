@@ -239,7 +239,8 @@ void loadInput() {
                 std::stringstream readFaceLine(tokens[i]);
                 std::string faceVN;
                 while (std::getline(readFaceLine, faceVN, '/')) {
-                    vecf.push_back(std::stoi(faceVN));
+                    vecf.push_back(std::stoi(faceVN) - 1);
+                    break;
                 }
             }
         }
